@@ -126,9 +126,8 @@ def plot_algorithms_compare_helper(hamiltonians_1, hamiltonians_2, hamiltonians_
   axes[1].plot(times, overlaps_3, label = label_3) 
   axes[0].legend(prop={'size': 22})
   axes[1].legend(prop={'size': 22})
-  filename = 'plots/overlap_algorithms_compare_N' + str(N) + "a" + str(a) + "b" + str(b) + '.png'
-  plt.savefig(filename)
-  plt.show()
+  filename_png = 'plots/overlap_algorithms_compare_N' + str(N) + "a" + str(a) + "b" + str(b) + '.png'
+  plt.savefig(filename_png)
 
 def houdayer_time_plot_helper(hamiltonians_1, hamiltonians_2, overlaps_1, overlaps_2):
   _, axes = plt.subplots(nrows=1, ncols=2, figsize=(32,8))
@@ -391,7 +390,7 @@ def plot_time_average_overlap_algorithms_compare(N, a, b, num_iter, n0, num_exp)
 
   times_avg = []
 
-  for exp in range(num_exp):
+  for exp in tqdm(range(num_exp)):
     x_star = np.random.choice([-1, 1], N)
     graph = generate_graph(N, x_star, a, b)
     
@@ -416,6 +415,20 @@ def plot_time_average_overlap_algorithms_compare(N, a, b, num_iter, n0, num_exp)
       overlaps_avg_1 = list(map(add, overlaps_avg_1, overlaps_1))
       overlaps_avg_2 = list(map(add, overlaps_avg_2, overlaps_2))
       overlaps_avg_3 = list(map(add, overlaps_avg_3, overlaps_3))
+
+    filename_txt = 'cache/overlap_algorithms_compare_N' + str(N) + "a" + str(a) + "b" + str(b) + '.txt'
+    with open(filename_txt, 'a') as f:
+      if exp == 0:
+        f.write('Number experiments: ' + str(num_exp) + '\n')
+        f.write('times: ' + str(times) + '\n \n \n')
+      f.write(str(exp) + ':\n')
+      f.write('Sum Hamiltonians Metropolis' + str(hamiltonians_avg_1) + '\n')
+      f.write('Sum Hamiltonians Houdayer' + str(hamiltonians_avg_2) + '\n')
+      f.write('Sum Hamiltonians Mixed' + str(hamiltonians_avg_3) + '\n')
+
+      f.write('Sum Overlaps Metropolis' + str(overlaps_avg_1) + '\n')
+      f.write('Sum Overlaps Houdayer' + str(overlaps_avg_2) + '\n')
+      f.write('Sum Overlaps Mixed' + str(overlaps_avg_3) + '\n\n\n')
   
   hamiltonians_avg_1 = [(1/num_exp) * i for i in hamiltonians_avg_1]
   hamiltonians_avg_2 = [(1/num_exp) * i for i in hamiltonians_avg_2]
@@ -424,6 +437,16 @@ def plot_time_average_overlap_algorithms_compare(N, a, b, num_iter, n0, num_exp)
   overlaps_avg_1 = [(1/num_exp) * i for i in overlaps_avg_1]
   overlaps_avg_2 = [(1/num_exp) * i for i in overlaps_avg_2]
   overlaps_avg_3 = [(1/num_exp) * i for i in overlaps_avg_3]
+
+  with open(filename_txt, 'a') as f:
+    f.write('Final Average:\n')
+    f.write('Average Hamiltonians Metropolis' + str(hamiltonians_avg_1) + '\n')
+    f.write('Average Hamiltonians Houdayer' + str(hamiltonians_avg_2) + '\n')
+    f.write('Average Hamiltonians Mixed' + str(hamiltonians_avg_3) + '\n')
+
+    f.write('Average Overlaps Metropolis' + str(overlaps_avg_1) + '\n')
+    f.write('Average Overlaps Houdayer' + str(overlaps_avg_2) + '\n')
+    f.write('Average Overlaps Mixed' + str(overlaps_avg_3) + '\n')
 
   return hamiltonians_avg_1, hamiltonians_avg_2, hamiltonians_avg_3, overlaps_avg_1, overlaps_avg_2, overlaps_avg_3, times_avg
 
