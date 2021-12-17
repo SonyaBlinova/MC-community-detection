@@ -117,7 +117,7 @@ def plot_algorithms_compare_helper(hamiltonians_1, hamiltonians_2, hamiltonians_
   axes[1].set_title(title2, fontsize=28, pad=20)
   label_1 = "Metropolis"
   label_2 = "Houdayer"
-  label_3 = "Mixed n0 = " + str(n0)
+  label_3 = "Mixed n0 = " + str(n0 - 1)
   axes[0].plot(times, hamiltonians_1, label = label_1)
   axes[0].plot(times, hamiltonians_2, label = label_2)
   axes[0].plot(times, hamiltonians_3, label = label_3)
