@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 def generate_graph_np(N, x_star, a, b):
   """
-  Numpy version.
+  Numpy version for original base chain.
   Observation graph generation. 
   """
   graph = np.zeros((N, N))
@@ -24,7 +24,7 @@ def generate_graph_np(N, x_star, a, b):
 
 def compute_h_np(graph, a, b, N):
   """
-  Numpy version.
+  Numpy version for original base chain.
   Compute h for the acceptance probabilities.
   """
   ln1 = np.log(a/b)
@@ -35,7 +35,7 @@ def compute_h_np(graph, a, b, N):
 
 def compute_accep_prob_np(x, h, N, psi_ij, psi_ji, i):
   """
-  Numpy version.
+  Numpy version for original base chain.
   Compute acceptance probability.
   """
   expo = 0
@@ -48,7 +48,7 @@ def compute_accep_prob_np(x, h, N, psi_ij, psi_ji, i):
 
 def hamiltonian_np(x, h, N):
   """
-  Numpy version.
+  Numpy version for original base chain.
   Hamiltonian.
   """
   p = 0
@@ -59,7 +59,7 @@ def hamiltonian_np(x, h, N):
 
 def overlap_np(x_star, x_final, N):
   """
-  Numpy version.
+  Numpy version for original base chain.
   Overlap.
   """
   over = 0
@@ -69,7 +69,7 @@ def overlap_np(x_star, x_final, N):
 
 def metropolis_step_np(curr_state, h, N, psi_ij, psi_ji):
   """
-  Numpy version.
+  Numpy version for original base chain.
   Metropolis step. It is used for the running metropolis algotith.
   """
   rand_ind = np.random.choice(N, 1)[0]
@@ -81,18 +81,18 @@ def metropolis_step_np(curr_state, h, N, psi_ij, psi_ji):
 
 def metropolis_run(curr_state, N, h, x_star, num_iter):
   """
-  Numpy version.
+  Numpy version for original base chain.
   Metroppolis algorithm.
   """
   for i in tqdm(range(num_iter)):
     curr_state = metropolis_step_np(curr_state, h, N, 1/N, 1/N)
   return overlap_np(x_star, curr_state, N)
 
-"""Networkx part"""
+"""Networkx part for original base chain."""
 
 def generate_graph(N, x_star, a, b):
   """
-  Networkx version.
+  Networkx version for original base chain.
   Observation graph deneration.
   """
   graph = nx.Graph()
@@ -108,22 +108,9 @@ def generate_graph(N, x_star, a, b):
           graph.add_edge(i,j)
   return graph
 
-def compute_h(graph, a, b, N):
-  """
-  Networkx version.
-  Compute h for the acceptance probabilities.
-
-  """
-  graph = nx.to_numpy_matrix(graph)
-  ln1 = np.log(a/b)
-  ln2 = np.log((1 - a/N)/(1 - b/N))
-  h = np.zeros_like(graph)
-  h = 1/2*(graph * ln1 + (1 - graph) * ln2)
-  return h
-
 def compute_accep_prob(graph, h, N, psi_ij, psi_ji, i):
   """
-  Networkx version.
+  Networkx version for original base chain.
   Compute acceptance probability.
   """
   expo = 0
@@ -134,9 +121,22 @@ def compute_accep_prob(graph, h, N, psi_ij, psi_ji, i):
   a = min(1, np.exp(expo) * (psi_ji/psi_ij))
   return a
 
+def compute_h(graph, a, b, N):
+  """
+  Networkx version for original base chain.
+  Compute h for the acceptance probabilities.
+
+  """
+  graph = nx.to_numpy_matrix(graph)
+  ln1 = np.log(a/b)
+  ln2 = np.log((1 - a/N)/(1 - b/N))
+  h = np.zeros_like(graph)
+  h = 1/2*(graph * ln1 + (1 - graph) * ln2)
+  return h
+
 def hamiltonian(graph, h, N):
   """
-  Networkx version.
+  Networkx version for original base chain.
   Hamiltonian.
   """
   p = 0
@@ -147,7 +147,7 @@ def hamiltonian(graph, h, N):
 
 def overlap(x_star, graph, N):
   """
-  Networkx version.
+  Networkx version for original base chain.
   Overlap.
   """
   over = 0
@@ -157,7 +157,7 @@ def overlap(x_star, graph, N):
 
 def metropolis_step(graph, h, N, psi_1, psi_2):
   """
-  Networkx version.
+  Networkx version for original base chain.
   Metropolis step. It is used for the Houdayer algorithms.
   """
   rand_ind = np.random.choice(N, 1)[0]
@@ -169,7 +169,7 @@ def metropolis_step(graph, h, N, psi_1, psi_2):
 
 def houdayer_step(G1, G2):
   """
-  Networkx version.
+  Networkx version for original base chain.
   Houdayer step.
   """
   # create subgraph
@@ -189,12 +189,96 @@ def houdayer_step(G1, G2):
 
 def houdayer_run(graph_curr_1, graph_curr_2, N, h, x_star, num_iter, n0 = 1):
   """
-  Networkx version.
+  Networkx version for original base chain.
   Houdayer and Mixed algorithms.
   """
   for i in tqdm(range(num_iter)):
     graph_curr_1 = metropolis_step(graph_curr_1, h, N, 1/N, 1/N)
     graph_curr_2 = metropolis_step(graph_curr_2, h, N, 1/N, 1/N)
+    if i % n0 == 0:
+      graph_curr_1, graph_curr_2 = houdayer_step(graph_curr_1, graph_curr_2)
+  return overlap(x_star, graph_curr_1, N), overlap(x_star, graph_curr_2, N)
+
+"""Networkx part for binary base chain."""
+
+def compute_accep_prob_binary(curr_graph, next_graph, h, N):
+  """
+  Networkx version for binary base chain.
+  Compute acceptance probability.
+  """  
+  pi_i = 1
+  for i in range(N):
+    for j in range(i+1, N):
+      pi_i *= np.exp(h[i,j] * curr_graph.nodes[i]['cl'] * curr_graph.nodes[j]['cl'])
+  pi_j = 1
+  for i in range(N):
+    for j in range(i+1, N):
+      pi_j *= np.exp(h[i,j] * next_graph.nodes[i]['cl'] * next_graph.nodes[j]['cl'])
+  
+  a = min(1, pi_j/pi_i)
+
+  return a
+
+def metropolis_step_binary(graph, h, N):  
+  """
+  Networkx version for binary base chain.
+  Metropolis step. It is used for the Houdayer algorithms.
+  """
+  next_step = np.random.choice([-1, +1])
+  curr_state = [0] * N
+  for node, cl in nx.get_node_attributes(graph, 'cl').items():
+    if cl == -1:
+      curr_state[node] = 0
+    else:
+      curr_state[node] = 1
+  
+  curr_decimal = binary_to_decimal(curr_state)
+  
+  next_decimal = curr_decimal + next_step
+  next_state = binary_to_decimal(next_decimal)
+  next_graph = nx.set_node_attributes(graph, dict(zip(range(N), next_state)), 'cl')
+  
+  a = compute_accep_prob(graph, next_graph, h, N)
+  rand_num = np.random.uniform(0,1)
+  if rand_num <= a:
+    nx.set_node_attributes(graph, dict(zip(range(N), next_state)), 'cl')
+  
+  return graph
+
+def binary_to_decimal(binary_list):
+  """
+  Converts a binary list into a decimal.
+  """
+  decimal = 0
+  for digit in binary_list:
+    decimal = (decimal << 1) | digit
+  
+  return decimal
+
+def decimal_to_binary(decimal):
+  """
+  Converts a decimal into a binary list.
+  """
+  binary_string = [int(i) for i in bin(decimal)[2:]]
+  return binary_string
+
+def metropolis_run_binary(graph, N, h, x_star, num_iter):
+  """
+  Networkx version for binary base chain.
+  Metropolis algorithm.
+  """
+  for i in tqdm(range(num_iter)):
+    graph = metropolis_step_binary(graph, h, N)
+  return overlap(x_star, graph, N)
+
+def houdayer_run_binary(graph_curr_1, graph_curr_2, N, h, x_star, num_iter, n0 = 1):
+  """
+  Networkx version for binary base chain.
+  Houdayer and Mixed algorithms.
+  """
+  for i in tqdm(range(num_iter)):
+    graph_curr_1 = metropolis_step_binary(graph_curr_1, h, N)
+    graph_curr_2 = metropolis_step_binary(graph_curr_2, h, N)
     if i % n0 == 0:
       graph_curr_1, graph_curr_2 = houdayer_step(graph_curr_1, graph_curr_2)
   return overlap(x_star, graph_curr_1, N), overlap(x_star, graph_curr_2, N)
