@@ -298,7 +298,7 @@ def plot_ratio_overlap_metropolis(N, num_iter):
       graph = generate_graph_np(N, x_star, a, b)
       h = compute_h_np(graph, a, b, N)
       over_exp = []
-      for i in range(2):
+      for i in range(10):
         initial_state = np.random.choice([-1, 1], N)
         over = metropolis_run(initial_state, N, h, x_star, num_iter)
         over_exp.append(over)
@@ -330,13 +330,16 @@ def plot_ratio_overlap_houdayer(N, num_iter, n0 = 1):
       a = b/ratio
       graph = generate_graph(N, x_star, a, b)
       h = compute_h(graph, a, b, N)
-      initial_state = np.random.choice([-1, 1], N)
-      graph_1 = graph.copy()
-      nx.set_node_attributes(graph_1, dict(zip(range(N), initial_state)), 'cl')
-      graph_2 = graph.copy()
-      nx.set_node_attributes(graph_2, dict(zip(range(N), initial_state)), 'cl')
-      over1, over2 = houdayer_run(graph_1, graph_2, N, h, x_star, num_iter, n0)
-      overlaps.append(np.mean([over1, over2]))
+      over_exp = []
+      for i in range(10):
+        initial_state = np.random.choice([-1, 1], N)
+        graph_1 = graph.copy()
+        nx.set_node_attributes(graph_1, dict(zip(range(N), initial_state)), 'cl')
+        graph_2 = graph.copy()
+        nx.set_node_attributes(graph_2, dict(zip(range(N), initial_state)), 'cl')
+        over1, over2 = houdayer_run(graph_1, graph_2, N, h, x_star, num_iter, n0)
+        over_exp.append(np.mean([over1, over2]))
+      overlaps.append(np.mean(over_exp))
 
     label = 'b = ' + str(b)
     axes.plot(ratios, overlaps, label = label, linewidth=3.0)
