@@ -99,19 +99,19 @@ def plot_time_average_overlap_algorithms_compare(N, a, b, num_iter, n0, num_exp)
       overlaps_avg_2 = overlaps_avg_2 + np.array(overlaps_2)
       overlaps_avg_3 = overlaps_avg_3 + np.array(overlaps_3)
 
-    filename_txt = 'cache/overlap_algorithms_compare_N' + str(N) + "a" + str(a) + "b" + str(b) + '.txt'
-    with open(filename_txt, 'a') as f:
-      if exp_num == 0:
-        f.write('Number experiments: ' + str(num_exp) + '\n')
-        f.write('times: ' + str(times) + '\n \n \n')
-      f.write(str(exp_num) + ':\n')
-      f.write('Sum Hamiltonians Metropolis' + str(hamiltonians_avg_1) + '\n')
-      f.write('Sum Hamiltonians Houdayer' + str(hamiltonians_avg_2) + '\n')
-      f.write('Sum Hamiltonians Mixed' + str(hamiltonians_avg_3) + '\n')
+    # filename_txt = 'cache/overlap_algorithms_compare_N' + str(N) + "a" + str(a) + "b" + str(b) + '.txt'
+    # with open(filename_txt, 'a') as f:
+    #   if exp_num == 0:
+    #     f.write('Number experiments: ' + str(num_exp) + '\n')
+    #     f.write('times: ' + str(times) + '\n \n \n')
+    #   f.write(str(exp_num) + ':\n')
+    #   f.write('Sum Hamiltonians Metropolis' + str(hamiltonians_avg_1) + '\n')
+    #   f.write('Sum Hamiltonians Houdayer' + str(hamiltonians_avg_2) + '\n')
+    #   f.write('Sum Hamiltonians Mixed' + str(hamiltonians_avg_3) + '\n')
 
-      f.write('Sum Overlaps Metropolis' + str(overlaps_avg_1) + '\n')
-      f.write('Sum Overlaps Houdayer' + str(overlaps_avg_2) + '\n')
-      f.write('Sum Overlaps Mixed' + str(overlaps_avg_3) + '\n\n\n')
+    #   f.write('Sum Overlaps Metropolis' + str(overlaps_avg_1) + '\n')
+    #   f.write('Sum Overlaps Houdayer' + str(overlaps_avg_2) + '\n')
+    #   f.write('Sum Overlaps Mixed' + str(overlaps_avg_3) + '\n\n\n')
   
   hamiltonians_avg_1 = hamiltonians_avg_1 / num_exp
   hamiltonians_avg_2 = hamiltonians_avg_2 / num_exp
@@ -121,15 +121,15 @@ def plot_time_average_overlap_algorithms_compare(N, a, b, num_iter, n0, num_exp)
   overlaps_avg_2 = overlaps_avg_2 / num_exp
   overlaps_avg_3 = overlaps_avg_3 / num_exp
 
-  with open(filename_txt, 'a') as f:
-    f.write('Final Average:\n')
-    f.write('Average Hamiltonians Metropolis' + str(hamiltonians_avg_1) + '\n')
-    f.write('Average Hamiltonians Houdayer' + str(hamiltonians_avg_2) + '\n')
-    f.write('Average Hamiltonians Mixed' + str(hamiltonians_avg_3) + '\n')
+  # with open(filename_txt, 'a') as f:
+  #   f.write('Final Average:\n')
+  #   f.write('Average Hamiltonians Metropolis' + str(hamiltonians_avg_1) + '\n')
+  #   f.write('Average Hamiltonians Houdayer' + str(hamiltonians_avg_2) + '\n')
+  #   f.write('Average Hamiltonians Mixed' + str(hamiltonians_avg_3) + '\n')
 
-    f.write('Average Overlaps Metropolis' + str(overlaps_avg_1) + '\n')
-    f.write('Average Overlaps Houdayer' + str(overlaps_avg_2) + '\n')
-    f.write('Average Overlaps Mixed' + str(overlaps_avg_3) + '\n')
+  #   f.write('Average Overlaps Metropolis' + str(overlaps_avg_1) + '\n')
+  #   f.write('Average Overlaps Houdayer' + str(overlaps_avg_2) + '\n')
+  #   f.write('Average Overlaps Mixed' + str(overlaps_avg_3) + '\n')
 
   return hamiltonians_avg_1, hamiltonians_avg_2, hamiltonians_avg_3, overlaps_avg_1, overlaps_avg_2, overlaps_avg_3, times_avg
 
@@ -139,8 +139,6 @@ def plot_algorithms_compare_helper(hamiltonians_1, hamiltonians_2, hamiltonians_
   axes[0].set_xlabel('Time', fontsize=20)
   axes[1].set_ylabel('Overlap', fontsize=20)
   axes[1].set_xlabel('Time', fontsize=20)
-  # axes[0].grid()
-  # axes[1].grid()
   title1 = 'Hamiltonian over Time with N = ' + str(N) + ', a = ' + str(a) + ', b = ' + str(b)
   title2 = 'Overlap over Time with N = ' + str(N) + ', a = ' + str(a) + ', b = ' + str(b)
   axes[0].set_title(title1, fontsize=22, pad=20)
@@ -175,7 +173,7 @@ def time_plot_compare_helper(overlaps_1, overlaps_2, overlaps_3, times, N, a_1, 
   plt.yticks(fontsize=16)
   # axes.grid()
   axes.legend(prop={'size': 20})
-  title = 'Overlap over Time:' + algo + ' with N = ' + str(N)
+  title = 'Overlap over Time: ' + algo + ' with N = ' + str(N)
   axes.set_title(title, fontsize=22, pad=20)
   if algo == 'Standard Metropolis Algorithm':
     filename = 'plots/overlap_metropolis_compare_N' + str(N) + "b1" + str(b_1) + "b2" + str(b_2) + "b3" + str(b_3) + '.png'
@@ -299,9 +297,12 @@ def plot_ratio_overlap_metropolis(N, num_iter):
       a = b/ratio
       graph = generate_graph_np(N, x_star, a, b)
       h = compute_h_np(graph, a, b, N)
-      initial_state = np.random.choice([-1, 1], N)
-      over = metropolis_run(initial_state, N, h, x_star, num_iter)
-      overlaps.append(over)
+      over_exp = []
+      for i in range(3):
+        initial_state = np.random.choice([-1, 1], N)
+        over = metropolis_run(initial_state, N, h, x_star, num_iter)
+        over_exp.append(over)
+      overlaps.append(np.mean(over_exp))
 
     
     label = 'b = ' + str(b)
@@ -322,8 +323,7 @@ def plot_ratio_overlap_houdayer(N, num_iter, n0 = 1):
   _, axes = plt.subplots(nrows=1, ncols=1, figsize=(12,8))
   for b in tqdm([0.1, 1.0, 5.0, 10.0]):
     ratios = []
-    overlaps_1 = []
-    overlaps_2 = []
+    overlaps = []
     for ratio in tqdm(range(1, 10)):
       ratio = ratio/10
       ratios.append(ratio)
@@ -336,11 +336,10 @@ def plot_ratio_overlap_houdayer(N, num_iter, n0 = 1):
       graph_2 = graph.copy()
       nx.set_node_attributes(graph_2, dict(zip(range(N), initial_state)), 'cl')
       over1, over2 = houdayer_run(graph_1, graph_2, N, h, x_star, num_iter, n0)
-      overlaps_1.append(over1)
-      overlaps_2.append(over2)
+      overlaps.append(np.mean([over1, over2]))
 
     label = 'b = ' + str(b)
-    axes.plot(ratios, overlaps_1, label = label, linewidth=3.0)
+    axes.plot(ratios, overlaps, label = label, linewidth=3.0)
 
   axes.set_ylabel('overlap', fontsize=20)
   axes.set_xlabel('b/a ratio', fontsize=20)
@@ -367,8 +366,7 @@ def plot_ratio_n0_houdayer(N, num_iter):
   _, axes = plt.subplots(nrows=1, ncols=1, figsize=(12,8))
   for n0 in tqdm([1, 5, 10]):
     ratios = []
-    overlaps_1 = []
-    overlaps_2 = []
+    overlaps = []
     for ratio in tqdm(range(1, 10)):
       ratio = ratio/10
       ratios.append(ratio)
@@ -382,11 +380,10 @@ def plot_ratio_n0_houdayer(N, num_iter):
       graph_2 = graph.copy()
       nx.set_node_attributes(graph_2, dict(zip(range(N), initial_state)), 'cl')
       over1, over2 = houdayer_run(graph_1, graph_2, N, h, x_star, num_iter, n0)
-      overlaps_1.append(over1)
-      overlaps_2.append(over2)
+      overlaps.append(np.mean([over1, over2]))
       
     label = 'n0 = ' + str(n0)
-    axes.plot(ratios, overlaps_1, label = label, linewidth=3.0)
+    axes.plot(ratios, overlaps, label = label, linewidth=3.0)
 
   axes.set_ylabel('overlap', fontsize=20)
   axes.set_xlabel('b/a ratio', fontsize=20)
@@ -410,9 +407,9 @@ def houdayer_time_plot_compare_n0_helper(overlaps_1, overlaps_2, overlaps_3, tim
   label_1 = "n0 = " + str(n0_1 - 1)
   label_2 = "n0 = " + str(n0_2 - 1)
   label_3 = "n0 = " + str(n0_3 - 1)
-  axes.plot(times, overlaps_1, label = label_1)
-  axes.plot(times, overlaps_2, label = label_2)
-  axes.plot(times, overlaps_3, label = label_3)
+  axes.plot(times, overlaps_1, label = label_1, linewidth=3.0)
+  axes.plot(times, overlaps_2, label = label_2, linewidth=3.0)
+  axes.plot(times, overlaps_3, label = label_3, linewidth=3.0)
   plt.xticks(fontsize=16)
   plt.yticks(fontsize=16)
   axes.legend(prop={'size': 20})
@@ -442,8 +439,6 @@ def plot_time_overlap_mixed_compare(N, a, b, num_iter, n0_1, n0_2, n0_3):
   
   graph_3_1 = graph_1_1.copy()
   graph_3_2 = graph_1_1.copy()
-
-
 
   for i in tqdm(range(num_iter)):
     if i % n0_1 == 1:

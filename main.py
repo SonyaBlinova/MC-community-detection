@@ -6,8 +6,8 @@ import seaborn as sns
 def main():
     sns.set_theme()
 
-    N = 1000
-    num_iter = 40000
+    N = 100
+    num_iter = 4000
     a = 6.9
     b = 0.1
     n0 = 6
@@ -36,6 +36,10 @@ def main():
     # plot_ratio_overlap_metropolis(N, num_iter)
     # plot_ratio_overlap_houdayer(N, num_iter, n0 = 1)
     # plot_ratio_overlap_houdayer(N, num_iter, n0 = 10)
+
+    """n0 and b/a"""
+
+    # plot_ratio_n0_houdayer(N, num_iter)
 
     """dependence for mixed algo over n0"""
 
