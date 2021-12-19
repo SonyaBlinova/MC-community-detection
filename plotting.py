@@ -549,3 +549,55 @@ def plot_time_overlap_houdayer(graph, N, a, b, x_star, num_iter, n0):
       overlaps_2.append(overlap(x_star, graph_2, N))
       clear_output(wait=True)
       houdayer_time_plot_helper(hamiltonians_1, hamiltonians_2, overlaps_1, overlaps_2)
+
+def plot_time_overlap_metropolis_binary(graph, N, a, b, x_star, num_iter):
+  '''
+  Plot hamiltonian and overlap for 1 metropolis experiment for binary base chain.
+  '''
+  h = compute_h(graph, a, b, N)
+
+  hamiltonians = []
+  overlaps = []
+  times = []
+
+  curr_state = np.random.choice([-1, 1], N)
+  
+  nx.set_node_attributes(graph, dict(zip(range(N), curr_state)), 'cl')
+
+  for i in tqdm(range(num_iter)):
+    graph = metropolis_step_binary(graph, h, N)
+    #print(nx.get_node_attributes(graph, 'cl'))
+    if i % 15 == 0:
+      hamiltonians.append(hamiltonian(graph, h, N))
+      overlaps.append(overlap(x_star, graph, N))
+      times.append(i)
+      clear_output(wait=True)
+  metropolis_time_plot_helper(hamiltonians, overlaps, times, N, a, b)
+
+def plot_time_overlap_houdayer_binary(graph, N, a, b, x_star, num_iter):
+  '''
+  Plot hamiltonian and overlap for 1 houdayer experiment for binary base chain.
+  '''
+  h = compute_h(graph, a, b, N)
+
+  hamiltonians_1 = []
+  hamiltonians_2 = []
+  overlaps_1 = []
+  overlaps_2 = []
+  initial_state_1 = np.random.choice([-1, 1], N)
+  graph_1 = graph.copy()
+  nx.set_node_attributes(graph_1, dict(zip(range(N), initial_state_1)), 'cl')
+  initial_state_2 = np.random.choice([-1, 1], N)
+  graph_2 = graph.copy()
+  nx.set_node_attributes(graph_2, dict(zip(range(N), initial_state_2)), 'cl')
+  for i in tqdm(range(num_iter)):
+    graph_1 = metropolis_step_binary(graph_1, h, N)
+    graph_2 = metropolis_step_binary(graph_2, h, N)
+    graph_1, graph_2 = houdayer_step(graph_1, graph_2)
+    if i % 10 == 0:
+      hamiltonians_1.append(hamiltonian(graph_1, h, N))
+      hamiltonians_2.append(hamiltonian(graph_2, h, N))
+      overlaps_1.append(overlap(x_star, graph_1, N))
+      overlaps_2.append(overlap(x_star, graph_2, N))
+      clear_output(wait=True)
+      houdayer_time_plot_helper(hamiltonians_1, hamiltonians_2, overlaps_1, overlaps_2)
