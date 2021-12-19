@@ -206,16 +206,24 @@ def compute_accep_prob_binary(curr_graph, next_graph, h, N):
   Networkx version for binary base chain.
   Compute acceptance probability.
   """  
+  #print(nx.get_node_attributes(curr_graph, 'cl'))
+  #print(nx.get_node_attributes(next_graph, 'cl'))
+  #print(nx.get_node_attributes(curr_graph, 'cl'))
+  #print(h)
+  #print(h[2,2])
   pi_i = 1
   for i in range(N):
     for j in range(i+1, N):
+      #print(curr_graph.nodes[j]['cl'])
       pi_i *= np.exp(h[i,j] * curr_graph.nodes[i]['cl'] * curr_graph.nodes[j]['cl'])
   pi_j = 1
+  #print(nx.get_node_attributes(next_graph, 'cl'))
   for i in range(N):
     for j in range(i+1, N):
       pi_j *= np.exp(h[i,j] * next_graph.nodes[i]['cl'] * next_graph.nodes[j]['cl'])
-  
-  a = min(1, pi_j/pi_i)
+  #print(pi_i)
+  #print(pi_j)
+  a = np.min([1, pi_j/pi_i])
 
   return a
 
@@ -224,7 +232,9 @@ def metropolis_step_binary(graph, h, N):
   Networkx version for binary base chain.
   Metropolis step. It is used for the Houdayer algorithms.
   """
-  next_step = np.random.choice([-1, +1])
+  next_step = 0
+  while next_step == 0:
+    next_step = np.random.choice(range(round(-N/2), round(N/2) + 1))
   curr_state = [0] * N
   for node, cl in nx.get_node_attributes(graph, 'cl').items():
     if cl == -1:
@@ -233,15 +243,37 @@ def metropolis_step_binary(graph, h, N):
       curr_state[node] = 1
   
   curr_decimal = binary_to_decimal(curr_state)
+  #print(curr_state)
+  #print(curr_decimal)
   
   next_decimal = curr_decimal + next_step
-  next_state = binary_to_decimal(next_decimal)
-  next_graph = nx.set_node_attributes(graph, dict(zip(range(N), next_state)), 'cl')
+  if next_decimal < 0:
+    next_decimal += np.power(2, N)
+  next_state = decimal_to_binary(next_decimal)
   
-  a = compute_accep_prob(graph, next_graph, h, N)
+  
+  for i, binary in enumerate(next_state):
+    if binary == 0:
+      next_state[i] = -1
+    else:
+      next_state[i] = 1
+  
+  if len(next_state) < N:
+    filler_list = [-1] * (N - len(next_state))
+    next_state = filler_list + next_state
+    
+  if len(next_state) > N:
+    del next_state[0]
+
+  #print(next_state)
+  next_graph = graph.copy()
+  nx.set_node_attributes(next_graph, dict(zip(range(N), next_state)), 'cl')
+  
+  a = compute_accep_prob_binary(graph, next_graph, h, N)
+  #print(next_step, ': ', a)
   rand_num = np.random.uniform(0,1)
   if rand_num <= a:
-    nx.set_node_attributes(graph, dict(zip(range(N), next_state)), 'cl')
+    graph = next_graph.copy()  
   
   return graph
 
