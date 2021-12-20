@@ -291,8 +291,8 @@ def plot_ratio_overlap_metropolis(N, num_iter):
   for b in tqdm([0.1, 1.0, 5.0]):
     overlaps = []
     ratios = []
-    for ratio in range(1, 10):
-      ratio = ratio/10
+    for ratio in range(1, 20):
+      ratio = ratio/20
       ratios.append(ratio)
       a = b/ratio
       graph = generate_graph_np(N, x_star, a, b)
@@ -324,8 +324,8 @@ def plot_ratio_overlap_houdayer(N, num_iter, n0 = 1):
   for b in tqdm([0.1, 1.0, 5.0]):
     ratios = []
     overlaps = []
-    for ratio in tqdm(range(1, 10)):
-      ratio = ratio/10
+    for ratio in tqdm(range(1, 20)):
+      ratio = ratio/20
       ratios.append(ratio)
       a = b/ratio
       graph = generate_graph(N, x_star, a, b)
@@ -370,8 +370,8 @@ def plot_ratio_n0_houdayer(N, num_iter):
   for n0 in tqdm([1, 5, 10]):
     ratios = []
     overlaps = []
-    for ratio in tqdm(range(1, 10)):
-      ratio = ratio/10
+    for ratio in tqdm(range(1, 20)):
+      ratio = ratio/20
       ratios.append(ratio)
       b = 10
       a = b/ratio
