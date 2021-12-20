@@ -291,14 +291,14 @@ def plot_ratio_overlap_metropolis(N, num_iter):
   for b in tqdm([0.1, 1.0, 5.0, 10.0]):
     overlaps = []
     ratios = []
-    for ratio in range(1, 40):
-      ratio = ratio/40
+    for ratio in range(1, 10):
+      ratio = ratio/10
       ratios.append(ratio)
       a = b/ratio
       graph = generate_graph_np(N, x_star, a, b)
       h = compute_h_np(graph, a, b, N)
       over_exp = []
-      for i in range(10):
+      for i in range(1):
         initial_state = np.random.choice([-1, 1], N)
         over = metropolis_run(initial_state, N, h, x_star, num_iter)
         over_exp.append(over)
@@ -323,8 +323,8 @@ def plot_ratio_overlap_all(N, num_iter, n0):
   overlaps_hou = []
   overlaps_mix = []
   ratios = []
-  for ratio in range(1, 400):
-    ratio = ratio/400
+  for ratio in tqdm(range(10, 100, 10)):
+    ratio = ratio/100
     ratios.append(ratio)
     b = 0.1
     a = b/ratio
@@ -336,7 +336,7 @@ def plot_ratio_overlap_all(N, num_iter, n0):
     over_exp_met = []
     over_exp_hou = []
     over_exp_mix = []
-    for i in range(10):
+    for i in range(1):
       initial_state = np.random.choice([-1, 1], N)
 
       over = metropolis_run(initial_state, N, h_m, x_star, num_iter)
@@ -457,24 +457,28 @@ def plot_ratio_n0_houdayer(N, num_iter):
 
 # dependence over n0
 
-def houdayer_time_plot_compare_n0_helper(overlaps_1, overlaps_2, overlaps_3, times, N, a, b, n0_1, n0_2, n0_3):
-  _, axes = plt.subplots(nrows=1, ncols=1, figsize=(12,8))
-  axes.set_ylabel('Overlap', fontsize=20)
-  axes.set_xlabel('Time', fontsize=20)
-  # axes.grid()
-  title = 'Overlap over Time: Mixed algorithm with N = ' + str(N) + ', a = ' + str(a) + ', b = ' + str(b)
-  axes.set_title(title, fontsize=22, pad=20)
-  label_1 = "n0 = " + str(n0_1 - 1)
-  label_2 = "n0 = " + str(n0_2 - 1)
-  label_3 = "n0 = " + str(n0_3 - 1)
-  axes.plot(times, overlaps_1, label = label_1, linewidth=3.0)
-  axes.plot(times, overlaps_2, label = label_2, linewidth=3.0)
-  axes.plot(times, overlaps_3, label = label_3, linewidth=3.0)
-  plt.xticks(fontsize=16)
-  plt.yticks(fontsize=16)
-  axes.legend(prop={'size': 20})
-  filename = 'plots/overlap_mixed_compare_n0_N' + str(N) + "a" + str(a) + "b" + str(b) + '.png'
-  plt.savefig(filename)
+def plot_time_average_overlap_mixed_n0_compare(N, a, b, num_iter, n0_1, n0_2, n0_3, num_exp):
+
+  for exp_num in tqdm(range(num_exp)):
+  
+    overlaps_1, overlaps_2, overlaps_3, times = plot_time_overlap_mixed_compare(N, a, b, num_iter, n0_1, n0_2, n0_3)
+    if exp_num == 0:
+      overlaps_avg_1 = np.array(overlaps_1.copy())
+      overlaps_avg_2 = np.array(overlaps_2.copy())
+      overlaps_avg_3 = np.array(overlaps_3.copy())
+
+      times_avg = np.array(times.copy())
+    else:
+      overlaps_avg_1 = overlaps_avg_1 + np.array(overlaps_1)
+      overlaps_avg_2 = overlaps_avg_2 + np.array(overlaps_2)
+      overlaps_avg_3 = overlaps_avg_3 + np.array(overlaps_3)
+
+    houdayer_time_plot_compare_n0_helper(overlaps_1, overlaps_2, overlaps_3, times, N, a, b, n0_1, n0_2, n0_3)
+
+  overlaps_avg_1 = overlaps_avg_1 / num_exp
+  overlaps_avg_2 = overlaps_avg_2 / num_exp
+  overlaps_avg_3 = overlaps_avg_3 / num_exp
+  return overlaps_avg_1, overlaps_avg_2, overlaps_avg_3, times_avg
 
 def plot_time_overlap_mixed_compare(N, a, b, num_iter, n0_1, n0_2, n0_3):
 
@@ -524,7 +528,75 @@ def plot_time_overlap_mixed_compare(N, a, b, num_iter, n0_1, n0_2, n0_3):
       overlaps_2.append(overlap(x_star, graph_2_1, N))
       overlaps_3.append(overlap(x_star, graph_3_1, N))
 
-      times.append(i)
+      times.append(i)   
+  return overlaps_1, overlaps_2, overlaps_3, times
+
+def houdayer_time_plot_compare_n0_helper(overlaps_1, overlaps_2, overlaps_3, times, N, a, b, n0_1, n0_2, n0_3):
+  _, axes = plt.subplots(nrows=1, ncols=1, figsize=(12,8))
+  label_1 = "n0 = " + str(n0_1 - 1)
+  label_2 = "n0 = " + str(n0_2 - 1)
+  label_3 = "n0 = " + str(n0_3 - 1)
+  axes.plot(times, overlaps_1, label = label_1, linewidth=3.0)
+  axes.plot(times, overlaps_2, label = label_2, linewidth=3.0)
+  axes.plot(times, overlaps_3, label = label_3, linewidth=3.0)
+  axes.set_ylabel('Overlap', fontsize=34)
+  axes.set_xlabel('Time', fontsize=34)
+  axes.legend(prop={'size': 30})
+  plt.xticks(fontsize=30)
+  plt.yticks(fontsize=30)
+  plt.tight_layout()
+  filename = 'plots/overlap_mixed_n0.pdf'
+  plt.savefig(filename)
+
+def plot_time_overlap_mixed_compare(N, a, b, num_iter, n0_1, n0_2, n0_3):
+
+  x_star = np.random.choice([-1, 1], N)
+  graph = generate_graph(N, x_star, a, b)
+  h = compute_h(graph, a, b, N)
+
+  overlaps_1 = []
+  overlaps_2 = []
+  overlaps_3 = []
+
+  times = []
+  for i in range(10):
+    initial_state = np.random.choice([-1, 1], N)
+
+    graph_1_1 = graph.copy()
+    nx.set_node_attributes(graph_1_1, dict(zip(range(N), initial_state)), 'cl')
+    graph_1_2 = graph_1_1.copy()
+    
+    graph_2_1 = graph_1_1.copy()
+    graph_2_2 = graph_1_1.copy()
+    
+    graph_3_1 = graph_1_1.copy()
+    graph_3_2 = graph_1_1.copy()
+
+    for i in tqdm(range(num_iter)):
+      if i % n0_1 == 1:
+        graph_1_1, graph_1_2 = houdayer_step(graph_1_1, graph_1_2)
+      else:
+        graph_1_1 = metropolis_step(graph_1_1, h, N, 1/N, 1/N)
+        graph_1_2 = metropolis_step(graph_1_2, h, N, 1/N, 1/N)
+
+      if i % n0_2 == 1:
+        graph_2_1, graph_2_2 = houdayer_step(graph_2_1, graph_2_2)
+      else:
+        graph_2_1 = metropolis_step(graph_2_1, h, N, 1/N, 1/N)
+        graph_2_2 = metropolis_step(graph_2_2, h, N, 1/N, 1/N)
+
+      if i % n0_3 == 1:
+        graph_3_1, graph_3_2 = houdayer_step(graph_3_1, graph_3_2)
+      else:
+        graph_3_1 = metropolis_step(graph_3_1, h, N, 1/N, 1/N)
+        graph_3_2 = metropolis_step(graph_3_2, h, N, 1/N, 1/N)
+      
+      if i % 10 == 0:
+        overlaps_1.append(overlap(x_star, graph_1_1, N))
+        overlaps_2.append(overlap(x_star, graph_2_1, N))
+        overlaps_3.append(overlap(x_star, graph_3_1, N))
+
+        times.append(i)
       
   houdayer_time_plot_compare_n0_helper(overlaps_1, overlaps_2, overlaps_3, times, N, a, b, n0_1, n0_2, n0_3)
 

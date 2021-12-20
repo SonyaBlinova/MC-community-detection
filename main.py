@@ -6,8 +6,8 @@ import seaborn as sns
 def main():
     sns.set_theme()
 
-    N = 250
-    num_iter = 10000
+    N = 100
+    num_iter = 4000
     a = 6.9
     b = 0.1
     n0 = 6
@@ -37,7 +37,7 @@ def main():
     # plot_ratio_overlap_houdayer(N, num_iter, n0 = 1)
     # plot_ratio_overlap_houdayer(N, num_iter, n0 = 10)
 
-    plot_ratio_overlap_all(N, num_iter, n0 = 5)
+    # plot_ratio_overlap_all(N, num_iter, n0 = 5)
 
     """n0 and b/a"""
 
@@ -45,9 +45,14 @@ def main():
 
     """dependence for mixed algo over n0"""
 
-    # n0_1 = 2
-    # n0_2 = 10
-    # n0_3 = 100
+    n0_1 = 5
+    n0_2 = 10
+    n0_3 = 20
+
+    over1, over2, over3, times = plot_time_average_overlap_mixed_n0_compare(N, a, b, num_iter, n0_1, n0_2, n0_3, num_exp)
+    houdayer_time_plot_compare_n0_helper(over1, over2, over3, times, N, a, b, n0_1, n0_2, n0_3)
+
+
     # plot_time_overlap_mixed_compare(N, a, b, num_iter, n0_1, n0_2, n0_3)
 
     end_time = time()
