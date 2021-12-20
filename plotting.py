@@ -288,11 +288,11 @@ def plot_ratio_overlap_metropolis(N, num_iter):
   ratios = []
   x_star = np.random.choice([-1, 1], N)
   _, axes = plt.subplots(nrows=1, ncols=1, figsize=(12,8))
-  for b in tqdm([0.1, 1.0, 5.0]):
+  for b in tqdm([0.1, 1.0, 5.0, 10.0]):
     overlaps = []
     ratios = []
-    for ratio in range(1, 20):
-      ratio = ratio/20
+    for ratio in range(1, 40):
+      ratio = ratio/40
       ratios.append(ratio)
       a = b/ratio
       graph = generate_graph_np(N, x_star, a, b)
@@ -303,19 +303,76 @@ def plot_ratio_overlap_metropolis(N, num_iter):
         over = metropolis_run(initial_state, N, h, x_star, num_iter)
         over_exp.append(over)
       overlaps.append(np.mean(over_exp))
-
-    
     label = 'b = ' + str(b)
     axes.plot(ratios, overlaps, label=label, linewidth=3.0)
 
-  axes.set_ylabel('overlap', fontsize=20)
-  axes.set_xlabel('b/a ratio', fontsize=20)
-  title = 'Overlap over b/a ratio: Standard Metropolis algorithm'
-  axes.set_title(title, fontsize=22, pad=20)
-  axes.legend(prop={'size': 20})
-  plt.xticks(fontsize=16)
-  plt.yticks(fontsize=16)
-  plt.savefig('plots/ratio_metropolis_list_b.png')
+  axes.set_ylabel('overlap', fontsize=34)
+  axes.set_xlabel('b/a ratio', fontsize=34)
+  axes.legend(prop={'size': 30})
+  plt.xticks(fontsize=30)
+  plt.yticks(fontsize=30)
+  plt.tight_layout()
+  plt.savefig('plots/ratio_metropolis.pdf')
+
+
+def plot_ratio_overlap_all(N, num_iter, n0):
+  ratios = []
+  x_star = np.random.choice([-1, 1], N)
+  _, axes = plt.subplots(nrows=1, ncols=1, figsize=(12,8))
+  overlaps_met = []
+  overlaps_hou = []
+  overlaps_mix = []
+  ratios = []
+  for ratio in range(1, 400):
+    ratio = ratio/400
+    ratios.append(ratio)
+    b = 0.1
+    a = b/ratio
+    graph_m = generate_graph_np(N, x_star, a, b)
+    h_m = compute_h_np(graph_m, a, b, N)
+
+    graph_h = generate_graph(N, x_star, a, b)
+    h_h = compute_h(graph_h, a, b, N)
+    over_exp_met = []
+    over_exp_hou = []
+    over_exp_mix = []
+    for i in range(10):
+      initial_state = np.random.choice([-1, 1], N)
+
+      over = metropolis_run(initial_state, N, h_m, x_star, num_iter)
+      over_exp_met.append(over)
+
+      graph_1 = graph_h.copy()
+      nx.set_node_attributes(graph_1, dict(zip(range(N), initial_state)), 'cl')
+      graph_2 = graph_h.copy()
+      nx.set_node_attributes(graph_2, dict(zip(range(N), initial_state)), 'cl')
+      over1, over2 = houdayer_run(graph_1, graph_2, N, h_h, x_star, num_iter)
+      over_exp_hou.append(np.mean([over1, over2]))
+
+      graph_1 = graph_h.copy()
+      nx.set_node_attributes(graph_1, dict(zip(range(N), initial_state)), 'cl')
+      graph_2 = graph_h.copy()
+      nx.set_node_attributes(graph_2, dict(zip(range(N), initial_state)), 'cl')
+      over1, over2 = houdayer_run(graph_1, graph_2, N, h_h, x_star, num_iter, n0)
+      over_exp_mix.append(np.mean([over1, over2]))
+
+    overlaps_met.append(np.mean(over_exp_met))
+    overlaps_hou.append(np.mean(over_exp_hou))
+    overlaps_mix.append(np.mean(over_exp_mix))
+
+  axes.plot(ratios, overlaps_met, label='Metropolis', linewidth=3.0)
+  axes.plot(ratios, overlaps_hou, label='Houdayer', linewidth=3.0)
+  axes.plot(ratios, overlaps_mix, label='Mixed n0 = 5', linewidth=3.0)
+
+  axes.set_ylabel('overlap', fontsize=34)
+  axes.set_xlabel('b/a ratio', fontsize=34)
+  # title = 'Overlap over b/a ratio'
+  # axes.set_title(title, fontsize=22, pad=20)
+  axes.legend(prop={'size': 30})
+  plt.xticks(fontsize=30)
+  plt.yticks(fontsize=30)
+  plt.tight_layout()
+  plt.savefig('plots/ratio_all_algo.pdf')
 
 def plot_ratio_overlap_houdayer(N, num_iter, n0 = 1):
   np.random.seed(100)

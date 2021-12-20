@@ -34,8 +34,10 @@ def main():
     """dependence on b/a ration"""
 
     # plot_ratio_overlap_metropolis(N, num_iter)
-    plot_ratio_overlap_houdayer(N, num_iter, n0 = 1)
+    # plot_ratio_overlap_houdayer(N, num_iter, n0 = 1)
     # plot_ratio_overlap_houdayer(N, num_iter, n0 = 10)
+
+    plot_ratio_overlap_all(N, num_iter, n0 = 5)
 
     """n0 and b/a"""
 
