@@ -2,61 +2,37 @@ from plotting import *
 from helpers import *
 from time import time
 import seaborn as sns
+import numpy as np
+import networkx as nx
+
+def txt_to_npy():
+    print(np.load('output.npy'))
 
 def main():
-    sns.set_theme()
-
-    N = 100
-    num_iter = 4000
-    a = 6.9
+    # enter filename here
+    matrix = np.load('A_test.npy')
+    N = matrix.shape[0]
+    # enter a and b here
+    a = 5.9
     b = 0.1
-    n0 = 6
-    num_exp = 1
-
-    start_time = time()
-
-    """compare convergence of different algos:"""
-
-    # hamiltonians_1, hamiltonians_2, hamiltonians_3, overlaps_1, overlaps_2, overlaps_3, times = plot_time_average_overlap_algorithms_compare(N, a, b, num_iter, n0, num_exp)
-    # plot_algorithms_compare_helper(hamiltonians_1, hamiltonians_2, hamiltonians_3, overlaps_1, overlaps_2, overlaps_3, times, N, a, b, n0)
-
-    """plot dependece of the conv time with different r and d"""
-
-    # a_1 = 6.9
-    # b_1 = 0.1
-    # a_2 = 16.9
-    # b_2 = 1.1
-    # a_3 = 26.9
-    # b_3 = 10.1
-    # plot_time_overlap_metropolis_compare(N, a_1, b_1, a_2, b_2, a_3, b_3, num_iter)
-    # plot_time_overlap_houdayer_compare(N, a_1, b_1, a_2, b_2, a_3, b_3, num_iter)
-
-    """dependence on b/a ration"""
-
-    # plot_ratio_overlap_metropolis(N, num_iter)
-    # plot_ratio_overlap_houdayer(N, num_iter, n0 = 1)
-    # plot_ratio_overlap_houdayer(N, num_iter, n0 = 10)
-
-    # plot_ratio_overlap_all(N, num_iter, n0 = 5)
-
-    """n0 and b/a"""
-
-    # plot_ratio_n0_houdayer(N, num_iter)
-
-    """dependence for mixed algo over n0"""
-
-    n0_1 = 5
-    n0_2 = 10
-    n0_3 = 20
-
-    over1, over2, over3, times = plot_time_average_overlap_mixed_n0_compare(N, a, b, num_iter, n0_1, n0_2, n0_3, num_exp)
-    houdayer_time_plot_compare_n0_helper(over1, over2, over3, times, N, a, b, n0_1, n0_2, n0_3)
-
-
-    # plot_time_overlap_mixed_compare(N, a, b, num_iter, n0_1, n0_2, n0_3)
-
-    end_time = time()
-    print('Excecution time:', end_time - start_time)
+    graph = nx.from_numpy_matrix(matrix)
+    h = compute_h(graph, a, b, N)
+    initial_state = np.random.choice([-1, 1], N)
+    graph_1 = graph.copy()
+    nx.set_node_attributes(graph_1, dict(zip(range(N), initial_state)), 'cl')
+    graph_2 = graph.copy()
+    nx.set_node_attributes(graph_2, dict(zip(range(N), initial_state)), 'cl')
+    i = 0
+    while True:
+        i += 1
+        graph_1 = metropolis_step(graph_1, h, N, 1/N, 1/N)
+        graph_2 = metropolis_step(graph_2, h, N, 1/N, 1/N)
+        if i % 5 == 0:
+            graph_1, graph_2 = houdayer_step(graph_1, graph_2)
+        if i % 10 == 0:
+            output = list(nx.get_node_attributes(graph_1, 'cl').values())
+            with open('output.npy', 'wb') as f:
+                np.save(f, output)
 
 if __name__ == "__main__":
     main()
